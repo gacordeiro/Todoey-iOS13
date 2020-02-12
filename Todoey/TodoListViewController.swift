@@ -8,13 +8,21 @@
 
 import UIKit
 
+struct K {
+    static let itemArrayKey = "TodoListArray"
+    static let itemCellKey = "ToDoItemCell"
+}
+
 class TodoListViewController: UITableViewController {
 
-    var itemArray = ["Find Mike", "Buy Eggos", "Destroy Demogorgon"]
+    var itemArray: [String] = []
+    let defaults = UserDefaults.standard
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        if let items = defaults.array(forKey: K.itemArrayKey) as? [String] {
+            itemArray = items
+        }
     }
 
     //MARK: TableView Datasource methods -
@@ -23,7 +31,7 @@ class TodoListViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: K.itemCellKey, for: indexPath)
         cell.textLabel?.text = itemArray[indexPath.row]
         return cell
     }
@@ -47,6 +55,7 @@ class TodoListViewController: UITableViewController {
         let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
             if let text = textField.text {
                 self.itemArray.append(text)
+                self.defaults.set(self.itemArray, forKey: K.itemArrayKey)
                 self.tableView.reloadData()
             }
         }
