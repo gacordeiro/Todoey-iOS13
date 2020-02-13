@@ -9,22 +9,40 @@
 import UIKit
 
 class ToDoListViewController: UITableViewController {
-
+    
     var itemArray: [ToDoItem] = []
-    let defaults = UserDefaults.standard
+    let dataFilePath = FileManager.default
+        .urls(for: .documentDirectory, in: .userDomainMask)
+        .first?
+        .appendingPathComponent(K.itemDocumentPath)
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        for i in 0...29 {
-            itemArray.append(ToDoItem(title: "Kill Demogorgon \(i+1)"))
-        }
-        
-//        if let items = defaults.array(forKey: K.itemArrayKey) as? [ToDoItem] {
-//            itemArray = items
-//        }
+        print(dataFilePath ?? "<dataFilePath not found>")
+        loadToDoItems()
     }
-
+    
+    private func loadToDoItems() {
+        if let data = try? Data(contentsOf: dataFilePath!) {
+            let decoder = PropertyListDecoder()
+            do {
+                itemArray = try decoder.decode([ToDoItem].self, from: data)
+            } catch {
+                print("Error dencoding item array, \(error)")
+            }
+        }
+    }
+    
+    private func saveToDoItems() {
+        do {
+            let encoder = PropertyListEncoder()
+            let data = try encoder.encode(itemArray)
+            try data.write(to: dataFilePath!)
+        } catch {
+            print("Error encoding item array, \(error)")
+        }
+    }
+    
     //MARK: TableView Datasource methods -
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return itemArray.count
@@ -41,6 +59,7 @@ class ToDoListViewController: UITableViewController {
     //MARK: TableView Delegate methods -
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         itemArray[indexPath.row].done = !itemArray[indexPath.row].done
+        saveToDoItems()
         tableView.reloadData()
         tableView.deselectRow(at: indexPath, animated: true)
     }
@@ -53,7 +72,7 @@ class ToDoListViewController: UITableViewController {
             if let text = textField.text {
                 let item = ToDoItem(title: text)
                 self.itemArray.append(item)
-                self.defaults.set(self.itemArray, forKey: K.itemArrayKey)
+                self.saveToDoItems()
                 self.tableView.reloadData()
             }
         }
