@@ -12,4 +12,5 @@ struct K {
     static let itemArrayKey = "TodoListArray"
     static let itemCellKey = "ToDoItemCell"
     static let itemDocumentPath = "ToDoItems.plist"
+    static let itemCoreDataModel = "DataModel"
 }

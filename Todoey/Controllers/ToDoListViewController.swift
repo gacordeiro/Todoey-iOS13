@@ -26,7 +26,7 @@ class ToDoListViewController: UITableViewController {
         if let data = try? Data(contentsOf: dataFilePath!) {
             let decoder = PropertyListDecoder()
             do {
-                itemArray = try decoder.decode([ToDoItem].self, from: data)
+                //itemArray = try decoder.decode([ToDoItem].self, from: data)
             } catch {
                 print("Error dencoding item array, \(error)")
             }
@@ -36,8 +36,8 @@ class ToDoListViewController: UITableViewController {
     private func saveToDoItems() {
         do {
             let encoder = PropertyListEncoder()
-            let data = try encoder.encode(itemArray)
-            try data.write(to: dataFilePath!)
+//            let data = try encoder.encode(itemArray)
+//            try data.write(to: dataFilePath!)
         } catch {
             print("Error encoding item array, \(error)")
         }
@@ -70,10 +70,10 @@ class ToDoListViewController: UITableViewController {
         let alert = UIAlertController(title: "Add New Todoey Item", message: "", preferredStyle: .alert)
         let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
             if let text = textField.text {
-                let item = ToDoItem(title: text)
-                self.itemArray.append(item)
-                self.saveToDoItems()
-                self.tableView.reloadData()
+//                let item = ToDoItem(title: text)
+//                self.itemArray.append(item)
+//                self.saveToDoItems()
+//                self.tableView.reloadData()
             }
         }
         alert.addTextField { (alertTextField) in
