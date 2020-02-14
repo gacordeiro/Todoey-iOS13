@@ -7,40 +7,17 @@
 //
 
 import UIKit
+import CoreData
 
 class ToDoListViewController: UITableViewController {
     
     var itemArray: [ToDoItem] = []
-    let dataFilePath = FileManager.default
-        .urls(for: .documentDirectory, in: .userDomainMask)
-        .first?
-        .appendingPathComponent(K.itemDocumentPath)
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        print(dataFilePath ?? "<dataFilePath not found>")
+        print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
         loadToDoItems()
-    }
-    
-    private func loadToDoItems() {
-        if let data = try? Data(contentsOf: dataFilePath!) {
-            let decoder = PropertyListDecoder()
-            do {
-                //itemArray = try decoder.decode([ToDoItem].self, from: data)
-            } catch {
-                print("Error dencoding item array, \(error)")
-            }
-        }
-    }
-    
-    private func saveToDoItems() {
-        do {
-            let encoder = PropertyListEncoder()
-//            let data = try encoder.encode(itemArray)
-//            try data.write(to: dataFilePath!)
-        } catch {
-            print("Error encoding item array, \(error)")
-        }
     }
     
     //MARK: TableView Datasource methods -
@@ -59,8 +36,9 @@ class ToDoListViewController: UITableViewController {
     //MARK: TableView Delegate methods -
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         itemArray[indexPath.row].done = !itemArray[indexPath.row].done
+//        context.delete(itemArray[indexPath.row])
+//        itemArray.remove(at: indexPath.row)
         saveToDoItems()
-        tableView.reloadData()
         tableView.deselectRow(at: indexPath, animated: true)
     }
     
@@ -70,10 +48,11 @@ class ToDoListViewController: UITableViewController {
         let alert = UIAlertController(title: "Add New Todoey Item", message: "", preferredStyle: .alert)
         let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
             if let text = textField.text {
-//                let item = ToDoItem(title: text)
-//                self.itemArray.append(item)
-//                self.saveToDoItems()
-//                self.tableView.reloadData()
+                let item = ToDoItem(context: self.context)
+                item.title = text
+                item.done = false
+                self.itemArray.append(item)
+                self.saveToDoItems()
             }
         }
         alert.addTextField { (alertTextField) in
@@ -84,4 +63,22 @@ class ToDoListViewController: UITableViewController {
         present(alert, animated: true, completion: nil)
     }
     
+    //MARK: Model manipulation methods -
+        private func loadToDoItems() {
+            let request: NSFetchRequest<ToDoItem> = ToDoItem.fetchRequest()
+            do {
+                itemArray = try context.fetch(request)
+            } catch {
+                print("Error fetching data from context, \(error)")
+            }
+        }
+        
+        private func saveToDoItems() {
+            do {
+                try context.save()
+            } catch {
+                print("Error saving context, \(error)")
+            }
+            tableView.reloadData()
+        }
 }
