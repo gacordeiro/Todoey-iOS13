@@ -2,13 +2,15 @@
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="15702" systemVersion="19D76" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
     <entity name="ToDoCategory" representedClassName=".ToDoCategory" syncable="YES" codeGenerationType="class">
         <attribute name="name" attributeType="String"/>
+        <relationship name="items" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="ToDoItem" inverseName="parentCategory" inverseEntity="ToDoItem"/>
     </entity>
     <entity name="ToDoItem" representedClassName=".ToDoItem" syncable="YES" codeGenerationType="class">
         <attribute name="done" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="title" attributeType="String"/>
+        <relationship name="parentCategory" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="ToDoCategory" inverseName="items" inverseEntity="ToDoCategory"/>
     </entity>
     <elements>
-        <element name="ToDoItem" positionX="-61.6015625" positionY="-2.015625" width="128" height="73"/>
-        <element name="ToDoCategory" positionX="-45" positionY="27" width="128" height="58"/>
+        <element name="ToDoCategory" positionX="-111.62109375" positionY="2.4609375" width="128" height="73"/>
+        <element name="ToDoItem" positionX="115.3515625" positionY="7.8046875" width="128" height="88"/>
     </elements>
 </model>

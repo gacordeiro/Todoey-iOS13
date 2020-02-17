@@ -11,15 +11,21 @@ import CoreData
 
 class CategoryViewController: UITableViewController {
 
-    //TODO: Understand why ToDoCategory is not recognized
-    //var categoryArray: [ToDoCategory] = []
-    var categoryArray: [ToDoItem] = []
+    var categoryArray: [ToDoCategory] = []
+    var clickedCategory: String = ""
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
 
     override func viewDidLoad() {
         super.viewDidLoad()
         print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
         loadToDoCategories()
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == K.goToToDoItemsSegue {
+            let destinationVC = segue.destination as! ToDoListViewController
+            destinationVC.parentCategory = clickedCategory
+        }
     }
 
     //MARK: - TableView Datasource methods
@@ -29,17 +35,17 @@ class CategoryViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: K.categoryCellKey, for: indexPath)
-        //cell.textLabel?.text = categoryArray[indexPath.row].name
-        cell.textLabel?.text = categoryArray[indexPath.row].title
+        cell.textLabel?.text = categoryArray[indexPath.row].name
         return cell
     }
 
     //MARK: - TableView Delegate methods
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        categoryArray[indexPath.row].done = !categoryArray[indexPath.row].done
-        saveToDoCategories()
         tableView.deselectRow(at: indexPath, animated: true)
-        //TODO: Perform segue to list ----------------------------------------------------
+        if let category = categoryArray[indexPath.row].name {
+            clickedCategory = category
+            performSegue(withIdentifier: K.goToToDoItemsSegue, sender: self)
+        }
     }
     
     //MARK: - Add new categories
@@ -48,10 +54,8 @@ class CategoryViewController: UITableViewController {
         let alert = UIAlertController(title: "Add New Todoey Category", message: "", preferredStyle: .alert)
         let action = UIAlertAction(title: "Add Category", style: .default) { (action) in
             if let text = textField.text {
-                //let category = ToDoCategory(context: self.context)
-                let category = ToDoItem(context: self.context)
-                //category.name = text
-                category.title = text
+                let category = ToDoCategory(context: self.context)
+                category.name = text
                 self.categoryArray.append(category)
                 self.saveToDoCategories()
             }
@@ -65,8 +69,7 @@ class CategoryViewController: UITableViewController {
     }
     
     //MARK: - Model Manipulation methods
-    //private func loadToDoCategories(with request: NSFetchRequest<ToDoCategory> = ToDoCategory.fetchRequest()) {
-    private func loadToDoCategories(with request: NSFetchRequest<ToDoItem> = ToDoItem.fetchRequest()) {
+    private func loadToDoCategories(with request: NSFetchRequest<ToDoCategory> = ToDoCategory.fetchRequest()) {
         do {
             categoryArray = try context.fetch(request)
         } catch {
