@@ -11,21 +11,14 @@ import CoreData
 
 class CategoryViewController: UITableViewController {
 
-    var categoryArray: [ToDoCategory] = []
-    var clickedCategory: String = ""
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    var categoryArray: [ToDoCategory] = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
         print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
+        navigationController?.navigationBar.tintColor = .white
         loadToDoCategories()
-    }
-    
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == K.goToToDoItemsSegue {
-            let destinationVC = segue.destination as! ToDoListViewController
-            destinationVC.parentCategory = clickedCategory
-        }
     }
 
     //MARK: - TableView Datasource methods
@@ -41,10 +34,14 @@ class CategoryViewController: UITableViewController {
 
     //MARK: - TableView Delegate methods
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true)
-        if let category = categoryArray[indexPath.row].name {
-            clickedCategory = category
-            performSegue(withIdentifier: K.goToToDoItemsSegue, sender: self)
+        performSegue(withIdentifier: K.goToToDoItemsSegue, sender: self)
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == K.goToToDoItemsSegue, let indexPath = tableView.indexPathForSelectedRow {
+            print("debug 2")
+            let destinationVC = segue.destination as! ToDoListViewController
+            destinationVC.selectedCategory = categoryArray[indexPath.row]
         }
     }
     
@@ -73,7 +70,7 @@ class CategoryViewController: UITableViewController {
         do {
             categoryArray = try context.fetch(request)
         } catch {
-            print("Error fetching data from context, \(error)")
+            print("Error fetching category data from context, \(error)")
         }
         tableView.reloadData()
     }
@@ -82,7 +79,7 @@ class CategoryViewController: UITableViewController {
         do {
             try context.save()
         } catch {
-            print("Error saving context, \(error)")
+            print("Error saving categories, \(error)")
         }
         tableView.reloadData()
     }

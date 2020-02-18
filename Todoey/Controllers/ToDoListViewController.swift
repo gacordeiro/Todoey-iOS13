@@ -11,17 +11,19 @@ import CoreData
 
 class ToDoListViewController: UITableViewController {
     
-    var parentCategory: String = ""
-    var itemArray: [ToDoItem] = []
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    var itemArray: [ToDoItem] = []
+    var selectedCategory: ToDoCategory? {
+        didSet {
+            loadToDoItems()
+        }
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        navigationController?.navigationBar.tintColor = .white
-        if (parentCategory.count > 0) {
-            title = "Items for \(parentCategory)"
+        if let category = selectedCategory?.name {
+            title = "Items for \(category)"
         }
-        loadToDoItems()
     }
     
     //MARK: - TableView Datasource methods
@@ -40,8 +42,6 @@ class ToDoListViewController: UITableViewController {
     //MARK: - TableView Delegate methods
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         itemArray[indexPath.row].done = !itemArray[indexPath.row].done
-        //        context.delete(itemArray[indexPath.row])
-        //        itemArray.remove(at: indexPath.row)
         saveToDoItems()
         tableView.deselectRow(at: indexPath, animated: true)
     }
@@ -55,6 +55,7 @@ class ToDoListViewController: UITableViewController {
                 let item = ToDoItem(context: self.context)
                 item.title = text
                 item.done = false
+                item.parentCategory = self.selectedCategory
                 self.itemArray.append(item)
                 self.saveToDoItems()
             }
@@ -70,9 +71,15 @@ class ToDoListViewController: UITableViewController {
     //MARK: - Model manipulation methods
     private func loadToDoItems(with request: NSFetchRequest<ToDoItem> = ToDoItem.fetchRequest()) {
         do {
+            let categoryPredicate = NSPredicate(format: "parentCategory.name MATCHES %@", selectedCategory?.name ?? "")
+            if let requestPredicate = request.predicate {
+                request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [requestPredicate, categoryPredicate])
+            } else {
+                request.predicate = categoryPredicate
+            }
             itemArray = try context.fetch(request)
         } catch {
-            print("Error fetching data from context, \(error)")
+            print("Error fetching item data from context, \(error)")
         }
         tableView.reloadData()
     }
@@ -81,7 +88,7 @@ class ToDoListViewController: UITableViewController {
         do {
             try context.save()
         } catch {
-            print("Error saving context, \(error)")
+            print("Error saving items, \(error)")
         }
         tableView.reloadData()
     }
