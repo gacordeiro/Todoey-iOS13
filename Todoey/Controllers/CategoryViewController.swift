@@ -16,8 +16,6 @@ class CategoryViewController: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
-        navigationController?.navigationBar.tintColor = .white
         loadToDoCategories()
     }
 
