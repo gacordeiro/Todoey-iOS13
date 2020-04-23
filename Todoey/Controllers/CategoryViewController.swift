@@ -9,7 +9,7 @@
 import UIKit
 import RealmSwift
 
-class CategoryViewController: UITableViewController {
+class CategoryViewController: SwipeTableViewController {
 
     let realm = try! Realm()
     var categories: Results<ToDoCategory>?
@@ -21,23 +21,22 @@ class CategoryViewController: UITableViewController {
 
     //MARK: - TableView Datasource methods
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        let rows = categories?.count ?? 1
-        return rows > 0 ? rows : 1
+        return categories?.count ?? 1
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: K.categoryCellKey, for: indexPath)
-        var name = "No Categories added yet"
-        if categories?.count ?? 0 > indexPath.row {
-            name = categories?[indexPath.row].name ?? ""
-        }
-        cell.textLabel?.text = name.count > 0 ? name : "<unnamed category>"
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
+        cell.textLabel?.text = categories?[indexPath.row].name ?? "No Categories added yet"
         return cell
     }
 
     //MARK: - TableView Delegate methods
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        performSegue(withIdentifier: K.goToToDoItemsSegue, sender: self)
+        if hasCategories() {
+            performSegue(withIdentifier: K.goToToDoItemsSegue, sender: self)
+        } else {
+            tableView.reloadData()
+        }
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -67,19 +66,38 @@ class CategoryViewController: UITableViewController {
     }
     
     //MARK: - Model Manipulation methods
+    func hasCategories(minCount: Int = 0) -> Bool {
+        return categories?.count ?? 0 > minCount
+    }
+    
     private func loadToDoCategories() {
         categories = realm.objects(ToDoCategory.self)
         tableView.reloadData()
     }
 
     private func save(_ category: ToDoCategory) {
+        updateRealm(warnIfError: "Error saving categories") {
+            realm.add(category)
+        }
+    }
+    
+    private func updateRealm(reloadAfterUpdate: Bool = true, warnIfError: String = "Error updating realm", update: () -> Void) {
         do {
             try realm.write {
-                realm.add(category)
+                update()
             }
+            if reloadAfterUpdate { tableView.reloadData() }
         } catch {
-            print("Error saving categories, \(error)")
+            print("\(warnIfError), \(error)")
         }
-        tableView.reloadData()
+    }
+    
+    //MARK: - SwipeTableViewCellDelegate methods
+    override func swipeAction(forRowAt indexPath: IndexPath) {
+        if let category = categories?[indexPath.row] {
+            updateRealm(reloadAfterUpdate: false, warnIfError: "Error deleting category") {
+                realm.delete(category)
+            }
+        }
     }
 }

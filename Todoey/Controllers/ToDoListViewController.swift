@@ -9,7 +9,7 @@
 import UIKit
 import RealmSwift
 
-class ToDoListViewController: UITableViewController {
+class ToDoListViewController: SwipeTableViewController {
     
     let realm = try! Realm()
     var toDoItems: Results<ToDoItem>?
@@ -28,15 +28,14 @@ class ToDoListViewController: UITableViewController {
     
     //MARK: - TableView Datasource methods
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        let rows = toDoItems?.count ?? 1
-        return rows > 0 ? rows : 1
+        return toDoItems?.count ?? 1
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: K.toDoItemCellKey, for: indexPath)
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         var title = "No Todoey items added yet"
         var done = false
-        if toDoItems?.count ?? 0 > indexPath.row, let item = toDoItems?[indexPath.row] {
+        if hasItems(minCount: indexPath.row), let item = toDoItems?[indexPath.row] {
             title = item.title
             done = item.done
         }
@@ -47,25 +46,13 @@ class ToDoListViewController: UITableViewController {
     
     //MARK: - TableView Delegate methods
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if toDoItems?.count ?? 0 > 0, let item = toDoItems?[indexPath.row] {
-            if (item.done) {
-                let alert = UIAlertController(title: "Delete Todoey Item?", message: "", preferredStyle: .alert)
-                let actionDelete = UIAlertAction(title: "Delete", style: .default) { (action) in
-                    self.updateRealm(warnIfError: "Error deleting item") {
-                        self.realm.delete(item)
-                    }
-                }
-                let actionNotDone = UIAlertAction(title: "Not Done", style: .default) { (action) in
-                    self.unckeck(item)
-                }
-                alert.addAction(actionDelete)
-                alert.addAction(actionNotDone)
-                present(alert, animated: true, completion: nil)
-            } else {
-                unckeck(item)
+        if hasItems(), let item = toDoItems?[indexPath.row] {
+            updateRealm(warnIfError: "Error saving done status") {
+                item.done = !item.done
             }
+        } else {
+            tableView.reloadData()
         }
-        tableView.reloadData()
     }
     
     //MARK: - Add new items
@@ -92,6 +79,10 @@ class ToDoListViewController: UITableViewController {
     }
     
     //MARK: - Model manipulation methods
+    func hasItems(minCount: Int = 0) -> Bool {
+        return toDoItems?.count ?? 0 > minCount
+    }
+    
     private func loadToDoItems(withFilter: String = "") {
         toDoItems = selectedCategory?.items.sorted(byKeyPath: "dateCreated", ascending: true)
         if (!withFilter.isEmpty) {
@@ -100,20 +91,23 @@ class ToDoListViewController: UITableViewController {
         tableView.reloadData()
     }
     
-    private func unckeck(_ item: ToDoItem) {
-        updateRealm(warnIfError: "Error saving done status") {
-            item.done = !item.done
-        }
-    }
-    
-    private func updateRealm(warnIfError: String = "Error updating realm", update: () -> Void) {
+    private func updateRealm(reloadAfterUpdate: Bool = true, warnIfError: String = "Error updating realm", update: () -> Void) {
         do {
             try realm.write {
                 update()
             }
-            tableView.reloadData()
+            if reloadAfterUpdate { tableView.reloadData() }
         } catch {
             print("\(warnIfError), \(error)")
+        }
+    }
+    
+    //MARK: - SwipeTableViewCellDelegate methods
+    override func swipeAction(forRowAt indexPath: IndexPath) {
+        if let item = toDoItems?[indexPath.row]  {
+            updateRealm(reloadAfterUpdate: false, warnIfError: "Error deleting item") {
+                realm.delete(item)
+            }
         }
     }
 }

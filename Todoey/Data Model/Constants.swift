@@ -10,7 +10,6 @@ import Foundation
 
 struct K {
     static let dataModelKey = "DataModel"
-    static let categoryCellKey = "CategoryCell"
     static let goToToDoItemsSegue = "goToToDoItems"
-    static let toDoItemCellKey = "ToDoItemCell"
+    static let swipeCellKey = "swipeCell"
 }
