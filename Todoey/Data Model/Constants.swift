@@ -6,10 +6,11 @@
 //  Copyright © 2020 App Brewery. All rights reserved.
 //
 
-import Foundation
+import UIKit
 
 struct K {
     static let dataModelKey = "DataModel"
     static let goToToDoItemsSegue = "goToToDoItems"
     static let swipeCellKey = "swipeCell"
+    static let defaultCellColor = UIColor.white
 }

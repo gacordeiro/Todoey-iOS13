@@ -35,12 +35,15 @@ class ToDoListViewController: SwipeTableViewController {
         let cell = super.tableView(tableView, cellForRowAt: indexPath)
         var title = "No Todoey items added yet"
         var done = false
-        if hasItems(minCount: indexPath.row), let item = toDoItems?[indexPath.row] {
+        var color: UIColor = K.defaultCellColor
+        if let item = toDoItems?[indexPath.row] {
             title = item.title
             done = item.done
+            color = item.cellColor.asUIColor()
         }
         cell.textLabel?.text = title
         cell.accessoryType = done ? .checkmark : .none
+        cell.backgroundColor = color
         return cell
     }
     
@@ -65,6 +68,7 @@ class ToDoListViewController: SwipeTableViewController {
                     let item = ToDoItem()
                     item.title = text
                     item.dateCreated = Date()
+                    item.cellColor = UIColor.randomFlat().hexValue()
                     category.items.append(item)
                 }
             }

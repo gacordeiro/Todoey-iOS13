@@ -6,7 +6,7 @@
 //  Copyright © 2020 App Brewery. All rights reserved.
 //
 
-import Foundation
+import UIKit
 
 extension Date {
     static let FORMAT_DATETIME = "yyyy-MM-dd HH:mm:ss"
@@ -14,5 +14,11 @@ extension Date {
         let format = DateFormatter()
         format.dateFormat = withFormat
         return format.string(from: self)
+    }
+}
+
+extension String {
+    func asUIColor(default: UIColor = K.defaultCellColor) -> UIColor {
+        return UIColor.init(hexString: self) ?? K.defaultCellColor
     }
 }

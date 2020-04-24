@@ -15,6 +15,11 @@ class SwipeTableViewController: UITableViewController, SwipeTableViewCellDelegat
     var swipeActionImageName = "delete-icon"
     var isDestructive = true
     
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        tableView.separatorStyle = .none
+    }
+    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: K.swipeCellKey, for: indexPath) as! SwipeTableViewCell
         cell.delegate = self

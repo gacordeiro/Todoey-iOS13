@@ -11,5 +11,6 @@ import RealmSwift
 
 class ToDoCategory: Object {
     @objc dynamic var name: String = ""
+    @objc dynamic var cellColor: String = ""
     let items = List<ToDoItem>()
 }
