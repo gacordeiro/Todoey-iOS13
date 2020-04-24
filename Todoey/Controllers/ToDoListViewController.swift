@@ -28,12 +28,19 @@ class ToDoListViewController: SwipeTableViewController {
     
     //MARK: - TableView Datasource methods
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return toDoItems?.count ?? 1
+        let itemsCount = toDoItems?.count ?? 0
+        if itemsCount == 0 {
+            tableView.setEmptyView(title: "Hurray! Nothing Todoey!", message: "You may add some items\nclicking on the + button")
+        }
+        else {
+            tableView.restore()
+        }
+        return itemsCount
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = super.tableView(tableView, cellForRowAt: indexPath)
-        var title = "No Todoey items added yet"
+        var title = ""
         var done = false
         var color: UIColor = K.defaultCellColor
         if let item = toDoItems?[indexPath.row] {

@@ -22,7 +22,14 @@ class CategoryViewController: SwipeTableViewController {
 
     //MARK: - TableView Datasource methods
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return categories?.count ?? 1
+        let itemsCount = categories?.count ?? 0
+        if itemsCount == 0 {
+            tableView.setEmptyView(title: "Hurray! Nothing Todoey!", message: "You may add some categories\nclicking on the + button")
+        }
+        else {
+            tableView.restore()
+        }
+        return itemsCount
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
