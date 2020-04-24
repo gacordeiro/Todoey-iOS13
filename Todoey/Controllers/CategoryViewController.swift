@@ -22,10 +22,10 @@ class CategoryViewController: SwipeTableViewController {
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        let color = FlatRed()
+        let color = UIColor.flatBlue()
         let contrastColor = ContrastColorOf(color, returnFlat: true)
         addButton.tintColor = contrastColor
-        navigationController?.configureFor(color: FlatBlue())
+        navigationController?.configureFor(color: color)
     }
 
     //MARK: - TableView Datasource methods
@@ -58,8 +58,6 @@ class CategoryViewController: SwipeTableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if hasCategories() {
             performSegue(withIdentifier: K.goToToDoItemsSegue, sender: self)
-        } else {
-            tableView.reloadData()
         }
     }
     
@@ -67,6 +65,7 @@ class CategoryViewController: SwipeTableViewController {
         if segue.identifier == K.goToToDoItemsSegue, let indexPath = tableView.indexPathForSelectedRow {
             let destinationVC = segue.destination as! ToDoListViewController
             destinationVC.selectedCategory = categories?[indexPath.row]
+            tableView.reloadData()
         }
     }
     

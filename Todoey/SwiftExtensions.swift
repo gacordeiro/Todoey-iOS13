@@ -57,10 +57,31 @@ extension UITableView {
 extension UINavigationController {
     func configureFor(color: UIColor) {
         let contrastColor = ContrastColorOf(color, returnFlat: true)
+        let contrastAttrs = [NSAttributedString.Key.foregroundColor : contrastColor]
         hidesNavigationBarHairline = true
         setStatusBarStyle(UIStatusBarStyle.darkContent)
-        navigationBar.barTintColor = color
-        navigationBar.tintColor = contrastColor
-        navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor : contrastColor]
+        
+        if #available(iOS 13.0, *) {
+            let navBarAppearance = UINavigationBarAppearance()
+            navBarAppearance.configureWithOpaqueBackground()
+            navBarAppearance.titleTextAttributes = contrastAttrs
+            navBarAppearance.largeTitleTextAttributes = contrastAttrs
+            navBarAppearance.backgroundColor = color
+            
+            let buttonAppearance = UIBarButtonItemAppearance(style: .plain)
+            buttonAppearance.normal.titleTextAttributes = contrastAttrs
+            navBarAppearance.buttonAppearance = buttonAppearance
+            navBarAppearance.backButtonAppearance = buttonAppearance
+            navBarAppearance.doneButtonAppearance = buttonAppearance
+
+            navigationBar.tintColor = contrastColor
+            navigationBar.standardAppearance = navBarAppearance
+            navigationBar.scrollEdgeAppearance = navBarAppearance
+            navigationBar.compactAppearance = navBarAppearance
+        } else {
+            navigationBar.barTintColor = color
+            navigationBar.tintColor = contrastColor
+            navigationBar.titleTextAttributes = contrastAttrs
+        }
     }
 }
