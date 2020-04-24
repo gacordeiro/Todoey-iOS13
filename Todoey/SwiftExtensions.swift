@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import ChameleonFramework
 
 extension Date {
     static let FORMAT_DATETIME = "yyyy-MM-dd HH:mm:ss"
@@ -50,5 +51,16 @@ extension UITableView {
     
     func restore() {
         self.backgroundView = nil
+    }
+}
+
+extension UINavigationController {
+    func configureFor(color: UIColor) {
+        let contrastColor = ContrastColorOf(color, returnFlat: true)
+        hidesNavigationBarHairline = true
+        setStatusBarStyle(UIStatusBarStyle.darkContent)
+        navigationBar.barTintColor = color
+        navigationBar.tintColor = contrastColor
+        navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor : contrastColor]
     }
 }

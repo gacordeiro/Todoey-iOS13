@@ -8,9 +8,12 @@
 
 import UIKit
 import RealmSwift
+import ChameleonFramework
 
 class ToDoListViewController: SwipeTableViewController {
     
+    @IBOutlet weak var addButton: UIBarButtonItem!
+    @IBOutlet weak var searchBar: UISearchBar!
     let realm = try! Realm()
     var toDoItems: Results<ToDoItem>?
     var selectedCategory: ToDoCategory? {
@@ -19,10 +22,17 @@ class ToDoListViewController: SwipeTableViewController {
         }
     }
     
-    override func viewDidLoad() {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewDidLoad()
-        if let category = selectedCategory?.name {
-            title = "Items for \(category)"
+        if let category = selectedCategory {
+            title = "\(category.name) items"
+            let color = getColorFor(row: 0)
+            let contrastColor = ContrastColorOf(color, returnFlat: true)
+            navigationController?.configureFor(color: color)
+            addButton.tintColor = contrastColor
+            searchBar.barTintColor = color
+            searchBar.searchTextField.textColor = contrastColor
+            searchBar.searchTextField.leftView?.tintColor = contrastColor
         }
     }
     
@@ -40,18 +50,24 @@ class ToDoListViewController: SwipeTableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = super.tableView(tableView, cellForRowAt: indexPath)
+        let color = getColorFor(row: indexPath.row)
         var title = ""
         var done = false
-        var color: UIColor = K.defaultCellColor
         if let item = toDoItems?[indexPath.row] {
             title = item.title
             done = item.done
-            color = item.cellColor.asUIColor()
         }
-        cell.textLabel?.text = title
-        cell.accessoryType = done ? .checkmark : .none
         cell.backgroundColor = color
+        cell.textLabel?.text = title
+        cell.textLabel?.textColor = ContrastColorOf(color, returnFlat: true)
+        cell.accessoryType = done ? .checkmark : .none
         return cell
+    }
+    
+    private func getColorFor(row: Int) -> UIColor {
+        let totalOfRows = toDoItems?.count ?? 1
+        let percent = row > 0 ? CGFloat(row) / CGFloat(totalOfRows * 4) : CGFloat(0)
+        return selectedCategory?.cellColor.asUIColor().darken(byPercentage: percent) ?? K.defaultCellColor
     }
     
     //MARK: - TableView Delegate methods
@@ -75,7 +91,6 @@ class ToDoListViewController: SwipeTableViewController {
                     let item = ToDoItem()
                     item.title = text
                     item.dateCreated = Date()
-                    item.cellColor = UIColor.randomFlat().hexValue()
                     category.items.append(item)
                 }
             }

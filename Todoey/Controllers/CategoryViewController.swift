@@ -12,12 +12,20 @@ import ChameleonFramework
 
 class CategoryViewController: SwipeTableViewController {
 
+    @IBOutlet weak var addButton: UIBarButtonItem!
     let realm = try! Realm()
     var categories: Results<ToDoCategory>?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         loadToDoCategories()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        let color = FlatRed()
+        let contrastColor = ContrastColorOf(color, returnFlat: true)
+        addButton.tintColor = contrastColor
+        navigationController?.configureFor(color: FlatBlue())
     }
 
     //MARK: - TableView Datasource methods
@@ -34,13 +42,14 @@ class CategoryViewController: SwipeTableViewController {
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = super.tableView(tableView, cellForRowAt: indexPath)
-        var title = "No Categories added yet"
         var color: UIColor = K.defaultCellColor
+        var title = "No Categories added yet"
         if let category = categories?[indexPath.row] {
             title = category.name
             color = category.cellColor.asUIColor()
         }
         cell.textLabel?.text = title
+        cell.textLabel?.textColor = ContrastColorOf(color, returnFlat: true)
         cell.backgroundColor = color
         return cell
     }
