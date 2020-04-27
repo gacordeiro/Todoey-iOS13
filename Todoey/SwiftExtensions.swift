@@ -58,8 +58,6 @@ extension UINavigationController {
     func configureFor(color: UIColor) {
         let contrastColor = ContrastColorOf(color, returnFlat: true)
         let contrastAttrs = [NSAttributedString.Key.foregroundColor : contrastColor]
-        hidesNavigationBarHairline = true
-        setStatusBarStyle(UIStatusBarStyle.darkContent)
         
         if #available(iOS 13.0, *) {
             let navBarAppearance = UINavigationBarAppearance()
@@ -82,6 +80,7 @@ extension UINavigationController {
             navigationBar.barTintColor = color
             navigationBar.tintColor = contrastColor
             navigationBar.titleTextAttributes = contrastAttrs
+            navigationBar.largeTitleTextAttributes = contrastAttrs
         }
     }
 }

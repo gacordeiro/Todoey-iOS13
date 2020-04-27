@@ -31,8 +31,10 @@ class ToDoListViewController: SwipeTableViewController {
             navigationController?.configureFor(color: color)
             addButton.tintColor = contrastColor
             searchBar.barTintColor = color
-            searchBar.searchTextField.textColor = contrastColor
-            searchBar.searchTextField.leftView?.tintColor = contrastColor
+            if #available(iOS 13.0, *) {
+                searchBar.searchTextField.textColor = contrastColor
+                searchBar.searchTextField.leftView?.tintColor = contrastColor
+            }
         }
     }
     
